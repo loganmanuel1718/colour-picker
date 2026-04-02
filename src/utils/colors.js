@@ -25,7 +25,7 @@ export const hexToRgb = (hexColor) => {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  return `RGB ${r}, ${g}, ${b}`;
+  return `${r}, ${g}, ${b}`;
 };
 
 export const hexToHsl = (hexColor) => {
@@ -55,7 +55,7 @@ export const hexToHsl = (hexColor) => {
   s = +(s * 100).toFixed(1);
   l = +(l * 100).toFixed(1);
 
-  return `HSL ${h}°, ${s}%, ${l}%`;
+  return `${h}°, ${s}%, ${l}%`;
 };
 
 export const hexToCmyk = (hexColor) => {
@@ -76,7 +76,7 @@ export const hexToCmyk = (hexColor) => {
   y = Math.round(y * 100);
   k = Math.round(k * 100);
 
-  return `CMYK ${c}%, ${m}%, ${y}%, ${k}%`;
+  return `${c}, ${m}, ${y}, ${k}`;
 };
 
 // Math to mix and extract colour sets based natively off white/black boundaries
