@@ -1,0 +1,243 @@
+.fluid-maker {
+  display: flex;
+  height: calc(100vh - 120px);
+  background: #f8fafc;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sidebar Controls */
+.fluid-sidebar {
+  width: 380px;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.fluid-sidebar h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.fluid-sidebar p {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.control-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.control-section h3 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.input-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.fluid-input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.fluid-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.fluid-select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: var(--font-primary);
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+/* Preview Area */
+.fluid-preview-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-header {
+  padding: 1.5rem 3rem;
+  background: white;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.viewport-slider-container {
+  flex: 1;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto;
+}
+
+.viewport-slider-container input {
+  flex: 1;
+}
+
+.preview-content {
+  flex: 1;
+  padding: 3rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0 auto;
+  background: white;
+  position: relative;
+}
+
+.preview-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.step-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  letter-spacing: 0.1em;
+}
+
+.step-text {
+  line-height: 1.2;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+/* Code Export */
+.fluid-export {
+  padding: 0;
+  border-top: 1px solid #e2e8f0;
+  background: #1e293b;
+}
+
+.export-header {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.export-code {
+  padding: 1rem 1.5rem 1.5rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #f1f5f9;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.copy-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: #2563eb;
+}
+
+/* Shadow indicators for the preview width */
+.width-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #e2e8f0;
+  pointer-events: none;
+}
+
+.width-label {
+  position: absolute;
+  top: 10px;
+  transform: translateX(-50%);
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+  .fluid-maker {
+    flex-direction: column;
+    height: auto;
+  }
+  .fluid-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}

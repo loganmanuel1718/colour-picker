@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { HeartPulse, Layers, Download } from 'lucide-react';
+import { HeartPulse, Layers, Download, Type } from 'lucide-react';
 import './App.css';
 import Header from './Header';
 import ColorColumn from './ColorColumn';
@@ -12,6 +12,7 @@ import BrandAI from './BrandAI';
 import AuthModal from './AuthModal';
 import MyLibrary from './MyLibrary';
 import ExploreGallery from './ExploreGallery';
+import FluidMaker from './FluidMaker';
 import { generateRandomColor } from './utils/colors';
 import { 
   DndContext, 
@@ -83,7 +84,7 @@ function App() {
 
   // Force viewMode gracefully back to specific layouts if user traverses unsupported global tabs
   useEffect(() => {
-    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai') {
+    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai' || activeTab === 'fluid') {
       setViewMode('create');
     }
   }, [activeTab]);
@@ -467,6 +468,10 @@ function App() {
              setToastMessage(msg);
              setTimeout(() => setToastMessage(null), 2500);
           }}
+        />
+      ) : activeTab === 'fluid' ? (
+        <FluidMaker 
+          setToastMessage={setToastMessage}
         />
       ) : (
         <ContrastMaker 

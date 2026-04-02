@@ -1,5 +1,5 @@
 import React from 'react';
-import { Palette, Sparkles, Download, Layers, HeartPulse } from 'lucide-react';
+import { Palette, Sparkles, Download, Layers, HeartPulse, Type } from 'lucide-react';
 
 export default function Header({ 
   activeTab, 
@@ -37,6 +37,7 @@ export default function Header({
         <button onClick={() => setActiveTab('glass')} style={{ background: activeTab === 'glass' ? 'white' : 'transparent', color: activeTab === 'glass' ? '#3b82f6' : '#64748b', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'glass' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>Glass</button>
         <button onClick={() => setActiveTab('contrast')} style={{ background: activeTab === 'contrast' ? 'white' : 'transparent', color: activeTab === 'contrast' ? '#3b82f6' : '#64748b', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'contrast' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>Contrast</button>
         <button onClick={() => setActiveTab('brand-ai')} style={{ background: activeTab === 'brand-ai' ? 'white' : 'transparent', color: activeTab === 'brand-ai' ? '#3b82f6' : '#64748b', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'brand-ai' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>Brand AI</button>
+        <button onClick={() => setActiveTab('fluid')} style={{ background: activeTab === 'fluid' ? 'white' : 'transparent', color: activeTab === 'fluid' ? '#3b82f6' : '#64748b', border: 'none', padding: '0.5rem 1.5rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'fluid' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}>Fluid</button>
       </div>
 
       <div className="header-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem' }}>
