@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Copy, Lock, Unlock, CopyPlus, Grid, X } from 'lucide-react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { getContrastColor, hexToRgb, hexToHsl, hexToCmyk, generateShades } from './utils/colors';
 
 export default function ColorColumn({ color, isLocked, onToggleLock, onCopy, onDuplicate, onChangeColor }) {
   const [isViewingShades, setIsViewingShades] = useState(false);
+  const columnRef = useRef(null);
+  const hexRef = useRef(null);
   const textColor = getContrastColor(color);
   
+  // Animate hex value on color change
+  useGSAP(() => {
+    gsap.fromTo(hexRef.current, 
+      { y: 10, opacity: 0, scale: 0.9 }, 
+      { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.7)' }
+    );
+  }, { scope: columnRef, dependencies: [color] });
+
   // Format getters
   const rgb = hexToRgb(color);
   const hsl = hexToHsl(color);
@@ -20,6 +32,7 @@ export default function ColorColumn({ color, isLocked, onToggleLock, onCopy, onD
   return (
     <div 
       className="color-column" 
+      ref={columnRef}
       style={{ backgroundColor: color, color: textColor, position: 'relative' }}
     >
       {isViewingShades && (
@@ -55,6 +68,7 @@ export default function ColorColumn({ color, isLocked, onToggleLock, onCopy, onD
         <div className="hex-wrapper">
           <button 
             className="hex-value"
+            ref={hexRef}
             onClick={() => onCopy(color)}
             aria-label={`Copy color ${color}`}
             title="Copy HEX"

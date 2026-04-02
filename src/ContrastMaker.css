@@ -85,6 +85,34 @@
 .wcag-badge.pass svg { color: #10b981; }
 .wcag-badge.fail svg { color: #ef4444; }
 
+.sidebar-badges {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.75rem !important;
+}
+
+.sidebar-badges .wcag-badge {
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.sidebar-badges .wcag-badge.pass {
+  border-color: #10b981;
+  color: #10b981;
+  background: #f0fdf4;
+}
+
+.sidebar-badges .wcag-badge.fail {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fef2f2;
+}
+
 .contrast-controls .slider-container input[type="range"] {
   flex: 1;
 }

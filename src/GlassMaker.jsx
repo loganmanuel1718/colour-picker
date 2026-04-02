@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { Copy } from 'lucide-react';
 import './GradientMaker.css';
 
@@ -9,6 +11,27 @@ export default function GlassMaker({ colors, setToastMessage }) {
   const [outlineSize, setOutlineSize] = useState(1);
   const [outlineAlpha, setOutlineAlpha] = useState(30);
   const [shadowAlpha, setShadowAlpha] = useState(37);
+
+  const mainRef = useRef(null);
+  const glassRef = useRef(null);
+
+  // Floating & Stagger animation
+  useGSAP(() => {
+    // Floating animation
+    gsap.to(glassRef.current, {
+      y: -15,
+      duration: 2.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+
+    // Staggered entry
+    gsap.fromTo(".control-group", 
+      { x: 30, opacity: 0 }, 
+      { x: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: "power2.out" }
+    );
+  }, { scope: mainRef });
 
   // Deriving background mesh natively from palette to visualize the blur beautifully
   const bgStyles = useMemo(() => {
@@ -87,10 +110,10 @@ box-shadow: 0 4px 30px rgba(0, 0, 0, ${shadowVal});`;
   };
 
   return (
-    <div className="gradient-maker">
+    <div className="gradient-maker" ref={mainRef}>
       <div className="gradient-preview-container" style={{ ...bgStyles, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {/* Render internal text dynamically scaling using contrast or shadow to guarantee readability across all opacities */}
-        <div style={glassStyleObj}>
+        <div style={glassStyleObj} ref={glassRef}>
           <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.75rem', letterSpacing: '-0.5px' }}>Glassmorphism</h2>
           <p style={{ margin: 0, opacity: 0.9, fontSize: '0.95rem', lineHeight: 1.5, fontWeight: 400 }}>
             Modern transparency seamlessly layered directly over your live colour palette.

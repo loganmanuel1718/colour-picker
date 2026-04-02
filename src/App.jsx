@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { HeartPulse, Layers, Download } from 'lucide-react';
 import './App.css';
 import Header from './Header';
@@ -21,6 +23,17 @@ function App() {
   // State: array of objects { id, hex, isLocked }
   const [colors, setColors] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
+  const paletteRef = useRef(null);
+
+  // Initial load stagger animation for palette
+  useGSAP(() => {
+    if (activeTab === 'palette' && colors.length > 0) {
+      gsap.fromTo(".color-column", 
+        { y: 50, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out' }
+      );
+    }
+  }, { scope: paletteRef, dependencies: [activeTab, colors.length === 0] });
 
   // Initialize library once securely on launch
   useEffect(() => {
@@ -211,10 +224,11 @@ function App() {
           setViewMode('create'); 
         }} />
       ) : activeTab === 'palette' ? (
-        <main className="palette-container">
-          {colors.map(color => (
+        <main className="palette-container" ref={paletteRef}>
+          {colors.map((color, idx) => (
             <ColorColumn
               key={color.id}
+              index={idx}
               color={color.hex}
               isLocked={color.isLocked}
               onToggleLock={() => toggleLock(color.id)}
@@ -247,14 +261,28 @@ function App() {
 
       {/* Subtle Toast Notification */}
       {toastMessage && (
-        <div className="toast-container">
-          <div style={{ backgroundColor: '#22c55e', borderRadius: '50%', padding: '2px', display: 'flex', alignItems: 'center' }}>
-            {/* Pure text validation check */}
-            <span style={{ fontSize: '10px', fontWeight: 'bold' }}>✓</span>
-          </div>
-          {toastMessage}
-        </div>
+        <Toast message={toastMessage} />
       )}
+    </div>
+  );
+}
+
+function Toast({ message }) {
+  const toastRef = useRef(null);
+  
+  useGSAP(() => {
+    gsap.fromTo(toastRef.current, 
+      { y: 50, opacity: 0 }, 
+      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
+    );
+  }, { scope: toastRef });
+
+  return (
+    <div className="toast-container" ref={toastRef}>
+      <div style={{ backgroundColor: '#22c55e', borderRadius: '50%', padding: '2px', display: 'flex', alignItems: 'center' }}>
+        <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'white' }}>✓</span>
+      </div>
+      {message}
     </div>
   );
 }

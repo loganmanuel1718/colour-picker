@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { Copy, RefreshCw, Plus, Trash2, CopyPlus, Download } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import { generateRandomColor } from './utils/colors';
@@ -14,6 +16,22 @@ const GradientMaker = forwardRef(({ colors, setToastMessage, gradientType, setGr
   const containerRef = useRef(null);
   const trackRef = useRef(null);
   const previewRef = useRef(null);
+  const controlsRef = useRef(null);
+  const mainRef = useRef(null);
+
+  // Entrance animation
+  useGSAP(() => {
+    const tl = gsap.timeline();
+    tl.fromTo(".gradient-preview-container", 
+      { scale: 0.9, opacity: 0 }, 
+      { scale: 1, opacity: 1, duration: 0.6, ease: 'power3.out' }
+    )
+    .fromTo(".control-group", 
+      { y: 20, opacity: 0 }, 
+      { y: 0, opacity: 1, duration: 0.4, stagger: 0.08, ease: 'power2.out' },
+      "-=0.4"
+    );
+  }, { scope: mainRef });
 
   // Initialize
   useEffect(() => {
@@ -254,7 +272,7 @@ const GradientMaker = forwardRef(({ colors, setToastMessage, gradientType, setGr
   };
 
   return (
-    <div className="gradient-maker">
+    <div className="gradient-maker" ref={mainRef}>
       <div 
         className="gradient-preview-container" 
         ref={containerRef}

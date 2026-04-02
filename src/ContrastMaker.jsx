@@ -1,4 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { RefreshCcw, CheckCircle2, XCircle } from 'lucide-react';
 import { hexToHslStruct, hslToHex, calculateContrastRatio, generateRandomColor } from './utils/colors';
 import './GradientMaker.css'; /* Reusing standard core layout */
@@ -8,7 +10,34 @@ export default function ContrastMaker({ colors }) {
   // Initialize from palette if available (top two colours structurally map directly if length >= 2)
   const [textHsl, setTextHsl] = useState({ h: 220, s: 10, l: 15 });
   const [bgHsl, setBgHsl] = useState({ h: 180, s: 50, l: 95 });
-  
+  const [displayRatio, setDisplayRatio] = useState(0);
+
+  const mainRef = useRef(null);
+  const ratioRef = useRef(null);
+
+  const textHex = useMemo(() => hslToHex(textHsl.h, textHsl.s, textHsl.l), [textHsl]);
+  const bgHex = useMemo(() => hslToHex(bgHsl.h, bgHsl.s, bgHsl.l), [bgHsl]);
+  const contrastNum = useMemo(() => calculateContrastRatio(textHex, bgHex), [textHex, bgHex]);
+
+  // Counter animation
+  useGSAP(() => {
+    const obj = { val: displayRatio };
+    gsap.to(obj, {
+      val: contrastNum,
+      duration: 0.5,
+      onUpdate: () => setDisplayRatio(obj.val),
+      ease: "power2.out"
+    });
+  }, { dependencies: [contrastNum] });
+
+  // Badge pop animation
+  useGSAP(() => {
+    gsap.fromTo(".wcag-badge", 
+      { scale: 0.8, opacity: 0 }, 
+      { scale: 1, opacity: 1, duration: 0.4, stagger: 0.1, ease: "back.out(1.7)" }
+    );
+  }, { scope: mainRef });
+
   // Track synchronization on mount
   useEffect(() => {
     if (colors && colors.length >= 2) {
@@ -30,10 +59,6 @@ export default function ContrastMaker({ colors }) {
     setBgHsl(textHsl);
   };
 
-  const textHex = useMemo(() => hslToHex(textHsl.h, textHsl.s, textHsl.l), [textHsl]);
-  const bgHex = useMemo(() => hslToHex(bgHsl.h, bgHsl.s, bgHsl.l), [bgHsl]);
-  
-  const contrastNum = useMemo(() => calculateContrastRatio(textHex, bgHex), [textHex, bgHex]);
   const contrastRatio = contrastNum.toFixed(2);
 
   // WCAG Scoring Badges
@@ -49,7 +74,7 @@ export default function ContrastMaker({ colors }) {
   );
 
   return (
-    <div className="gradient-maker">
+    <div className="gradient-maker" ref={mainRef}>
       
       {/* Massive Visual Sandbox Canvas */}
       <div 
@@ -63,18 +88,25 @@ export default function ContrastMaker({ colors }) {
         <div className="contrast-demo-box">
           <h1 className="contrast-huge-text">Aa</h1>
           <div className="contrast-score-display">
-            <span className="contrast-number">{contrastRatio}</span>
-            <div className="wcag-badge-grid">
-              {renderBadge('AA Small (4.5)', passesAASmall)}
-              {renderBadge('AA Large (3.0)', passesAALarge)}
-              {renderBadge('AAA (7.0)', passesAAASmall)}
-            </div>
+            <span className="contrast-number">{displayRatio.toFixed(2)}</span>
           </div>
         </div>
       </div>
 
       <div className="gradient-controls contrast-controls">
         
+        {/* WCAG Score Badges - Moved to Sidebar */}
+        <div className="control-group" style={{ marginBottom: '1.5rem' }}>
+          <label style={{ marginBottom: '1rem', display: 'block' }}>Contrast Accessibility</label>
+          <div className="wcag-badge-grid sidebar-badges">
+            {renderBadge('AA Small (4.5)', passesAASmall)}
+            {renderBadge('AA Large (3.0)', passesAALarge)}
+            {renderBadge('AAA (7.0)', passesAAASmall)}
+          </div>
+        </div>
+
+        <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.05)', margin: '1rem 0' }} />
+
         {/* TEXT COLOR CONTROLLER */}
         <div className="control-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
