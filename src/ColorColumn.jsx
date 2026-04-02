@@ -1,15 +1,36 @@
 import React, { useState, useRef } from 'react';
-import { Copy, Lock, Unlock, CopyPlus, Grid, X } from 'lucide-react';
+import { Copy, Lock, Unlock, CopyPlus, Grid, X, GripVertical } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { getContrastColor, hexToRgb, hexToHsl, hexToCmyk, generateShades } from './utils/colors';
 
-export default function ColorColumn({ color, isLocked, onToggleLock, onCopy, onDuplicate, onChangeColor }) {
+export default function ColorColumn({ id, color, isLocked, onToggleLock, onCopy, onDuplicate, onChangeColor }) {
   const [isViewingShades, setIsViewingShades] = useState(false);
   const columnRef = useRef(null);
   const hexRef = useRef(null);
   const textColor = getContrastColor(color);
   
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    backgroundColor: color,
+    color: textColor,
+    zIndex: isDragging ? 100 : 1,
+    opacity: isDragging ? 0.8 : 1,
+    position: 'relative'
+  };
+
   // Animate hex value on color change
   useGSAP(() => {
     gsap.fromTo(hexRef.current, 
@@ -32,9 +53,25 @@ export default function ColorColumn({ color, isLocked, onToggleLock, onCopy, onD
   return (
     <div 
       className="color-column" 
-      ref={columnRef}
-      style={{ backgroundColor: color, color: textColor, position: 'relative' }}
+      ref={setNodeRef}
+      style={style}
     >
+      {/* Drag Handle */}
+      <div 
+        className="drag-handle" 
+        {...attributes} 
+        {...listeners}
+        style={{ 
+          position: 'absolute', 
+          top: '20px', 
+          cursor: isDragging ? 'grabbing' : 'grab',
+          opacity: 0.4,
+          padding: '10px',
+          zIndex: 5
+        }}
+      >
+        <GripVertical size={20} />
+      </div>
       {isViewingShades && (
         <div className="shades-overlay">
           <button 

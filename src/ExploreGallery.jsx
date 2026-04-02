@@ -1,28 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Download, Check } from 'lucide-react';
+import { Heart, Download, Loader2 } from 'lucide-react';
 import { getLibrary, likeItem, hasLiked } from './utils/storage';
 import './ExploreGallery.css';
 
 export default function ExploreGallery({ activeTab, onLoadData }) {
   const [items, setItems] = useState([]);
   const [likedIds, setLikedIds] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch initial items straight from localStorage depending on the actively selected tool
-    const loaded = getLibrary(activeTab);
-    setItems(loaded);
-    
-    // Check locally which items have already been liked
-    const userLikes = loaded.filter(item => hasLiked(item.id)).map(item => item.id);
-    setLikedIds(userLikes);
+    const fetchGallery = async () => {
+      setLoading(true);
+      const loaded = await getLibrary(activeTab);
+      setItems(loaded);
+      
+      const userLikes = loaded.filter(item => hasLiked(item.id)).map(item => item.id);
+      setLikedIds(userLikes);
+      setLoading(false);
+    };
+
+    fetchGallery();
   }, [activeTab]);
 
-  const handleLike = (id) => {
-    if (likeItem(activeTab, id)) {
+  const handleLike = async (id) => {
+    const success = await likeItem(id);
+    if (success) {
       setLikedIds([...likedIds, id]);
       setItems(items.map(item => item.id === id ? { ...item, likes: item.likes + 1 } : item));
     }
   };
+
+  if (loading) {
+    return (
+      <div className="explore-empty">
+        <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+        <p style={{ marginTop: '1rem', color: '#64748b' }}>Fetching from the cloud...</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -51,7 +66,7 @@ export default function ExploreGallery({ activeTab, onLoadData }) {
                 </div>
               )}
 
-              {/* Gradient Preview Renderer (Simple rendering logic if expanding) */}
+              {/* Gradient Preview Renderer */}
               {activeTab === 'gradient' && item.data && item.data.styleObj && (
                 <div className="gallery-preview-gradient" style={item.data.styleObj} />
               )}

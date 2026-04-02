@@ -10,6 +10,18 @@ import GlassMaker from './GlassMaker';
 import ContrastMaker from './ContrastMaker';
 import ExploreGallery from './ExploreGallery';
 import { generateRandomColor } from './utils/colors';
+import { 
+  DndContext, 
+  closestCenter, 
+  PointerSensor, 
+  useSensor, 
+  useSensors 
+} from '@dnd-kit/core';
+import { 
+  arrayMove, 
+  SortableContext, 
+  horizontalListSortingStrategy 
+} from '@dnd-kit/sortable';
 import { exportPaletteAsImage } from './utils/export';
 import { initLibrary, saveToLibrary } from './utils/storage';
 
@@ -24,6 +36,15 @@ function App() {
   const [colors, setColors] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
   const paletteRef = useRef(null);
+
+  // DnD Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Minimum 8px drag before starting sort
+      },
+    })
+  );
 
   // Initial load stagger animation for palette
   useGSAP(() => {
@@ -120,28 +141,61 @@ function App() {
     });
   };
 
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setColors((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   const handleExport = () => {
     exportPaletteAsImage(colors);
     setToastMessage("Palette exported to image!");
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (activeTab === 'palette') {
-      saveToLibrary('palette', colors);
-      setToastMessage("Palette published to Community!");
-      setViewMode('explore');
+      const success = await saveToLibrary('palette', colors);
+      if (success) {
+        setToastMessage("Palette published to Community!");
+        setViewMode('explore');
+      } else {
+        setToastMessage("Failed to publish palette.");
+      }
     } else if (activeTab === 'gradient') {
       if (gradientRef.current) {
         const payload = gradientRef.current.getExportPayload();
-        saveToLibrary('gradient', payload);
-        setToastMessage("Gradient published to Community!");
-        setViewMode('explore');
+        const success = await saveToLibrary('gradient', payload);
+        if (success) {
+          setToastMessage("Gradient published to Community!");
+          setViewMode('explore');
+        } else {
+          setToastMessage("Failed to publish gradient.");
+        }
       }
     } else {
       setToastMessage("Publishing is only available for Palettes & Gradients currently.");
-      setTimeout(() => setToastMessage(null), 2500);
     }
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const handleUseContrastColors = (textHex, bgHex) => {
+    setColors([
+      { id: `col-${Date.now()}-0`, hex: bgHex, isLocked: false },
+      { id: `col-${Date.now()}-1`, hex: textHex, isLocked: false },
+      { id: `col-${Date.now()}-2`, hex: generateRandomColor(), isLocked: false },
+      { id: `col-${Date.now()}-3`, hex: generateRandomColor(), isLocked: false },
+      { id: `col-${Date.now()}-4`, hex: generateRandomColor(), isLocked: false },
+    ]);
+    setActiveTab('palette');
+    setToastMessage("Contrast colors applied to palette!");
+    setTimeout(() => setToastMessage(null), 2500);
   };
 
   return (
@@ -224,20 +278,32 @@ function App() {
           setViewMode('create'); 
         }} />
       ) : activeTab === 'palette' ? (
-        <main className="palette-container" ref={paletteRef}>
-          {colors.map((color, idx) => (
-            <ColorColumn
-              key={color.id}
-              index={idx}
-              color={color.hex}
-              isLocked={color.isLocked}
-              onToggleLock={() => toggleLock(color.id)}
-              onCopy={copyToClipboard}
-              onDuplicate={() => duplicateColor(color.id)}
-              onChangeColor={(newHex) => handleColorChange(color.id, newHex)}
-            />
-          ))}
-        </main>
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <main className="palette-container" ref={paletteRef}>
+            <SortableContext 
+              items={colors.map(c => c.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              {colors.map((color, idx) => (
+                <ColorColumn
+                  key={color.id}
+                  id={color.id}
+                  index={idx}
+                  color={color.hex}
+                  isLocked={color.isLocked}
+                  onToggleLock={() => toggleLock(color.id)}
+                  onCopy={copyToClipboard}
+                  onDuplicate={() => duplicateColor(color.id)}
+                  onChangeColor={(newHex) => handleColorChange(color.id, newHex)}
+                />
+              ))}
+            </SortableContext>
+          </main>
+        </DndContext>
       ) : activeTab === 'gradient' ? (
         <GradientMaker 
           ref={gradientRef}
@@ -256,6 +322,7 @@ function App() {
       ) : (
         <ContrastMaker 
           colors={colors} 
+          onUseInPalette={handleUseContrastColors}
         />
       )}
 

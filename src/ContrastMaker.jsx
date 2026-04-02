@@ -6,7 +6,7 @@ import { hexToHslStruct, hslToHex, calculateContrastRatio, generateRandomColor }
 import './GradientMaker.css'; /* Reusing standard core layout */
 import './ContrastMaker.css';
 
-export default function ContrastMaker({ colors }) {
+export default function ContrastMaker({ colors, onUseInPalette }) {
   // Initialize from palette if available (top two colours structurally map directly if length >= 2)
   const [textHsl, setTextHsl] = useState({ h: 220, s: 10, l: 15 });
   const [bgHsl, setBgHsl] = useState({ h: 180, s: 50, l: 95 });
@@ -19,6 +19,11 @@ export default function ContrastMaker({ colors }) {
   const bgHex = useMemo(() => hslToHex(bgHsl.h, bgHsl.s, bgHsl.l), [bgHsl]);
   const contrastNum = useMemo(() => calculateContrastRatio(textHex, bgHex), [textHex, bgHex]);
 
+  // WCAG Scoring Badges
+  const passesAASmall = contrastNum >= 4.5;
+  const passesAALarge = contrastNum >= 3.0; // Large text is >= 18pt or >= 14pt bold
+  const passesAAASmall = contrastNum >= 7.0;
+
   // Counter animation
   useGSAP(() => {
     const obj = { val: displayRatio };
@@ -30,18 +35,17 @@ export default function ContrastMaker({ colors }) {
     });
   }, { dependencies: [contrastNum] });
 
-  // Badge pop animation
+  // Badge pop animation - triggers on mount and when thresholds are crossed
   useGSAP(() => {
     gsap.fromTo(".wcag-badge", 
       { scale: 0.8, opacity: 0 }, 
       { scale: 1, opacity: 1, duration: 0.4, stagger: 0.1, ease: "back.out(1.7)" }
     );
-  }, { scope: mainRef });
+  }, { scope: mainRef, dependencies: [passesAASmall, passesAALarge, passesAAASmall] });
 
   // Track synchronization on mount
   useEffect(() => {
     if (colors && colors.length >= 2) {
-      // Background first (color[0]), text second (color[1]) maps more logically visually
       setBgHsl(hexToHslStruct(colors[0].hex));
       setTextHsl(hexToHslStruct(colors[1].hex));
     } else if (colors && colors.length === 1) {
@@ -58,13 +62,6 @@ export default function ContrastMaker({ colors }) {
     setTextHsl(bgHsl);
     setBgHsl(textHsl);
   };
-
-  const contrastRatio = contrastNum.toFixed(2);
-
-  // WCAG Scoring Badges
-  const passesAASmall = contrastNum >= 4.5;
-  const passesAALarge = contrastNum >= 3.0; // Large text is >= 18pt or >= 14pt bold
-  const passesAAASmall = contrastNum >= 7.0;
   
   const renderBadge = (label, passes) => (
     <div className={`wcag-badge ${passes ? 'pass' : 'fail'}`}>
@@ -158,16 +155,29 @@ export default function ContrastMaker({ colors }) {
         </div>
 
         <div className="control-group" style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <button 
-            onClick={reverseColors}
-            style={{ 
-              background: 'white', border: '1px solid #e2e8f0', padding: '0.75rem', 
-              borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center',
-              alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#475569'
-            }}
-          >
-            <RefreshCcw size={16} /> Swap Colors
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              onClick={reverseColors}
+              style={{ 
+                flex: 1, background: 'white', border: '1px solid #e2e8f0', padding: '0.75rem', 
+                borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center',
+                alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#475569'
+              }}
+            >
+              <RefreshCcw size={16} /> Swap
+            </button>
+            
+            <button 
+              onClick={() => onUseInPalette?.(textHex, bgHex)}
+              style={{ 
+                flex: 1.5, background: '#f0f9ff', border: '1px solid #0ea5e9', padding: '0.75rem', 
+                borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center',
+                alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#0369a1'
+              }}
+            >
+              Use in Palette
+            </button>
+          </div>
           
           <button 
             onClick={randomizeAll}

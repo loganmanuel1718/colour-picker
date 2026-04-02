@@ -5,7 +5,7 @@ export default function Header({ activeTab, setActiveTab, setGradientType, onGen
   return (
     <header className="header" style={{ padding: '1rem 2rem' }}>
       <div className="brand" style={{ flex: 1 }}>
-        <Palette className="brand-icon" size={28} strokeWidth={2.5} />
+        <span className="brand-emoji" style={{ fontSize: '28px', lineHeight: '1' }}>😉</span>
         <span>Chromator</span>
       </div>
       
@@ -95,14 +95,6 @@ export default function Header({ activeTab, setActiveTab, setGradientType, onGen
         
         {activeTab === 'palette' && viewMode === 'create' && (
           <span className="helper-text">Press Spacebar to generate</span>
-        )}
-
-        {viewMode === 'create' && (
-          <button className="btn-generate" onClick={onGenerate}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={16} /> Generate {activeTab === 'gradient' ? 'Colors' : ''}
-            </span>
-          </button>
         )}
       </div>
     </header>

@@ -107,6 +107,16 @@
   }
 }
 
+.drag-handle {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.drag-handle:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .color-info {
   display: flex;
   flex-direction: column;
