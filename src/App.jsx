@@ -9,6 +9,8 @@ import GradientMaker from './GradientMaker';
 import GlassMaker from './GlassMaker';
 import ContrastMaker from './ContrastMaker';
 import BrandAI from './BrandAI';
+import AuthModal from './AuthModal';
+import MyLibrary from './MyLibrary';
 import ExploreGallery from './ExploreGallery';
 import { generateRandomColor } from './utils/colors';
 import { 
@@ -24,12 +26,15 @@ import {
   horizontalListSortingStrategy 
 } from '@dnd-kit/sortable';
 import { exportPaletteAsImage } from './utils/export';
-import { initLibrary, saveToLibrary } from './utils/storage';
+import { initLibrary, saveToLibrary, saveToUserLibrary } from './utils/storage';
+import { supabase } from './utils/supabase';
 
 function App() {
   const [activeTab, setActiveTab] = useState('palette'); // 'palette' or 'gradient'
   const [gradientType, setGradientType] = useState('linear');
   const [viewMode, setViewMode] = useState('create'); // 'create' or 'explore'
+  const [user, setUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingGradient, setPendingGradient] = useState(null);
   const gradientRef = useRef(null);
   
@@ -60,6 +65,20 @@ function App() {
   // Initialize library once securely on launch
   useEffect(() => {
     initLibrary();
+
+    // Check for existing session
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Force viewMode gracefully back to specific layouts if user traverses unsupported global tabs
@@ -198,6 +217,29 @@ function App() {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
+  const handleSaveToProfile = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    const name = prompt("Name your creation:") || `My ${activeTab}`;
+    let success = false;
+    if (activeTab === 'palette') {
+      success = await saveToUserLibrary('palette', colors, name);
+    } else if (activeTab === 'gradient' && gradientRef.current) {
+      const payload = gradientRef.current.getExportPayload();
+      success = await saveToUserLibrary('gradient', payload, name);
+    }
+
+    if (success) {
+      setToastMessage(`"${name}" saved to your profile!`);
+    } else {
+      setToastMessage("Failed to save. Check your connection.");
+    }
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
   const handleApplyAIPalette = (aiColors) => {
     setColors(aiColors.map(c => ({
       id: c.id,
@@ -232,6 +274,10 @@ function App() {
         onExport={handleExport} 
         onPublish={handlePublish}
         viewMode={viewMode}
+        setViewMode={setViewMode}
+        user={user}
+        onOpenAuth={() => setShowAuthModal(true)}
+        onLogout={() => supabase.auth.signOut()}
       />
 
       {(activeTab === 'palette' || activeTab === 'gradient') && (
@@ -253,12 +299,28 @@ function App() {
             >
               Explore Community
             </button>
+            {user && (
+              <button 
+                onClick={() => setViewMode('my-library')}
+                style={{ fontFamily: 'var(--font-primary)', padding: '0.4rem 2.5rem', borderRadius: '6px', border: 'none', background: viewMode === 'my-library' ? 'white' : 'transparent', color: viewMode === 'my-library' ? '#3b82f6' : '#64748b', fontWeight: 'bold', cursor: 'pointer', boxShadow: viewMode === 'my-library' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+              >
+                My Library
+              </button>
+            )}
           </div>
 
           {/* Contextual Action Tooling */}
           <div style={{ flex: 1, display: 'flex', gap: '1rem', justifyContent: 'flex-end', alignItems: 'center' }}>
              {(activeTab === 'palette' || activeTab === 'gradient') && viewMode === 'create' && (
                 <>
+                  <button 
+                    onClick={handleSaveToProfile}
+                    title="Save to your Profile"
+                    style={{ background: '#eff6ff', color: '#3b82f6', border: '2px solid #3b82f6', padding: '0.4rem 1rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Download size={16} /> {user ? 'Save to Profile' : 'Sign in to Save'}
+                  </button>
+
                   <button 
                     onClick={handlePublish}
                     title="Publish to Community"
@@ -300,6 +362,15 @@ function App() {
             setPendingGradient(data);
           }
           setViewMode('create'); 
+        }} />
+      ) : viewMode === 'my-library' ? (
+        <MyLibrary activeTab={activeTab} onLoadData={(data) => {
+          if(activeTab === 'palette') {
+            setColors(data);
+          } else if(activeTab === 'gradient') {
+            setPendingGradient(data);
+          }
+          setViewMode('create');
         }} />
       ) : activeTab === 'palette' ? (
         <DndContext 
@@ -399,6 +470,13 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showAuthModal && (
+        <AuthModal 
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={(user) => setUser(user)}
+        />
       )}
     </div>
   );
