@@ -6,7 +6,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { getContrastColor, hexToRgb, hexToHsl, hexToCmyk, generateShades } from './utils/colors';
 
-export default function ColorColumn({ id, color, isLocked, onToggleLock, onCopy, onDuplicate, onChangeColor }) {
+export default function ColorColumn({ id, color, isLocked, onToggleLock, onCopy, onDuplicate, onRemove, onChangeColor }) {
   const [isViewingShades, setIsViewingShades] = useState(false);
   const columnRef = useRef(null);
   const hexRef = useRef(null);
@@ -163,6 +163,17 @@ export default function ColorColumn({ id, color, isLocked, onToggleLock, onCopy,
               title="Duplicate color"
             >
               <CopyPlus size={22} />
+            </button>
+          )}
+
+          {onRemove && (
+            <button 
+              className="icon-btn remove-btn"
+              onClick={onRemove}
+              aria-label="Remove color"
+              title="Remove color"
+            >
+              <X size={22} />
             </button>
           )}
         </div>

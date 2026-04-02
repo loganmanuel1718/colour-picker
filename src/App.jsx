@@ -146,10 +146,36 @@ function App() {
     setColors(prev => prev.map(c => c.id === id ? { ...c, hex: newHex } : c));
   };
 
+  const addColor = () => {
+    setColors(prev => {
+      if (prev.length >= 12) {
+        setToastMessage("Maximum 12 colors supported!");
+        setTimeout(() => setToastMessage(null), 2500);
+        return prev;
+      }
+      return [...prev, {
+        id: `col-${Date.now()}`,
+        hex: generateRandomColor(),
+        isLocked: false
+      }];
+    });
+  };
+
+  const removeColor = (id) => {
+    setColors(prev => {
+      if (prev.length <= 2) {
+        setToastMessage("Minimum 2 colors required!");
+        setTimeout(() => setToastMessage(null), 2500);
+        return prev;
+      }
+      return prev.filter(c => c.id !== id);
+    });
+  };
+
   const duplicateColor = (id) => {
     setColors(prev => {
-      if (prev.length >= 10) {
-        setToastMessage("Maximum 10 colors reached!");
+      if (prev.length >= 12) {
+        setToastMessage("Maximum 12 colors supported!");
         setTimeout(() => setToastMessage(null), 2500);
         return prev;
       }
@@ -402,9 +428,20 @@ function App() {
                   onToggleLock={() => toggleLock(color.id)}
                   onCopy={copyToClipboard}
                   onDuplicate={() => duplicateColor(color.id)}
+                  onRemove={() => removeColor(color.id)}
                   onChangeColor={(newHex) => handleColorChange(color.id, newHex)}
                 />
               ))}
+              
+              {colors.length < 12 && (
+                <button 
+                  className="add-column-btn" 
+                  onClick={addColor}
+                  title="Add Color"
+                >
+                  <div className="add-column-plus">+</div>
+                </button>
+              )}
             </SortableContext>
           </main>
         </DndContext>
