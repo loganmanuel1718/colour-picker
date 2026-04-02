@@ -1,0 +1,90 @@
+/* Contrast Maker Specific Styles */
+
+.contrast-canvas {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem !important;
+}
+
+.contrast-demo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.contrast-huge-text {
+  font-family: var(--font-heading);
+  font-size: clamp(6rem, 20vw, 16rem);
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -4px;
+}
+
+.contrast-score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.contrast-number {
+  font-family: var(--font-primary);
+  font-size: clamp(3rem, 8vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.wcag-badge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.wcag-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.wcag-badge.pass {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+}
+
+.wcag-badge.fail {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+/* Light mode specific background inversion for badges if on very dark contrasts, 
+   but practically just sticking to simple colors or solid whites is safer.
+   We'll use currentColor binding for pure fluidity. */
+.wcag-badge {
+  color: inherit; 
+  background: transparent;
+  border: 2px solid currentColor;
+}
+.wcag-badge.pass svg { color: #10b981; }
+.wcag-badge.fail svg { color: #ef4444; }
+
+.contrast-controls .slider-container input[type="range"] {
+  flex: 1;
+}

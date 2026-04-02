@@ -1,0 +1,341 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.brand-icon {
+  color: #3b82f6;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.helper-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .helper-text {
+    display: block;
+  }
+}
+
+.btn-generate {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+.btn-generate:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(59, 130, 246, 0.4);
+}
+
+.btn-generate:active {
+  transform: translateY(1px);
+}
+
+.palette-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .palette-container {
+    flex-direction: column;
+  }
+}
+
+/* Color Column Styles */
+.color-column {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Mobile standard, desktop uses center */
+  align-items: center;
+  padding: 2rem;
+  transition: background-color 0.4s ease, flex 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.color-column:hover {
+  flex: 1.1; /* Slight expand effect on hover */
+}
+
+@media (min-width: 769px) {
+  .color-column {
+    justify-content: center;
+    padding-bottom: 2rem;
+  }
+}
+
+.color-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.color-column:hover .color-info {
+  opacity: 1;
+}
+
+.hex-value {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: inherit;
+  transition: transform 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+@media (min-width: 769px) {
+  .hex-value {
+    font-size: 2.5rem;
+  }
+}
+
+.hex-value:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* On mobile, always show controls */
+@media (max-width: 768px) {
+  .controls {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .color-info {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+  }
+}
+
+.color-column:hover .controls {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.icon-btn.locked {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Alternative formats display */
+.alt-formats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  align-items: center;
+  margin-top: -1rem; /* pull up when hidden */
+}
+
+.color-column:hover .alt-formats {
+  opacity: 0.8;
+  height: 80px; /* enough space for lines */
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .alt-formats {
+    display: none; /* keep mobile clean */
+  }
+}
+
+.alt-format-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.alt-format-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.hex-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+/* Toast logic */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 50;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Shade Overlay Logic */
+.shades-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  background: transparent;
+}
+
+@media (max-width: 768px) {
+  .shades-overlay {
+     flex-direction: row;
+  }
+  .shade-block {
+     height: 100%;
+  }
+}
+
+.shade-block {
+  flex: 1;
+  cursor: pointer;
+  transition: flex 0.2s ease, background-color 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .shade-block:hover {
+    flex: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .shade-block:hover {
+    flex: 3;
+  }
+}
+
+.shade-hex-label {
+  opacity: 0;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  letter-spacing: 1px;
+}
+
+.shade-block:hover .shade-hex-label {
+  opacity: 1;
+}
+
+.shades-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: white;
+  display: flex;
+  padding: 6px;
+  transition: all 0.2s;
+}
+
+.shades-close-btn:hover {
+  background: rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
