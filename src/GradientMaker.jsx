@@ -33,7 +33,8 @@ const GradientMaker = forwardRef(({ colors, setToastMessage, gradientType, setGr
     );
   }, { scope: mainRef });
 
-  // Initialize
+  // Initialize and Sync Logic
+  // Split into specific effects to avoid race conditions when loading saved presets
   useEffect(() => {
     if (pendingGradient) {
       setGradientType(pendingGradient.gradientType);
@@ -41,8 +42,12 @@ const GradientMaker = forwardRef(({ colors, setToastMessage, gradientType, setGr
       setNodes(pendingGradient.nodes);
       // Immediately clear the pending state so future palette loads naturally trigger correctly.
       setPendingGradient(null);
-      return;
     }
+  }, [pendingGradient, setGradientType, setPendingGradient]);
+
+  // Sync with palette colors ONLY if we aren't currently loading a preset
+  useEffect(() => {
+    if (pendingGradient) return;
 
     const unifiedNodes = colors.map((c, i) => ({
       id: c.id,
@@ -54,7 +59,7 @@ const GradientMaker = forwardRef(({ colors, setToastMessage, gradientType, setGr
       extent: Math.floor(Math.random() * 40 + 40)
     }));
     setNodes(unifiedNodes);
-  }, [colors, pendingGradient]);
+  }, [colors]); // Only re-sync when palette actually changes
 
   const generateMeshLayout = () => {
     setNodes(prev => prev.map(n => ({
