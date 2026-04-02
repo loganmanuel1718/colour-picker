@@ -173,8 +173,7 @@ function App() {
     }
   };
 
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [publishName, setPublishName] = useState('');
+  const [namingModal, setNamingModal] = useState({ isOpen: false, mode: 'publish', name: '' });
 
   const handleExport = () => {
     exportPaletteAsImage(colors);
@@ -184,60 +183,62 @@ function App() {
 
   const handlePublish = () => {
     if (activeTab === 'palette' || activeTab === 'gradient') {
-      setIsPublishing(true);
-      setPublishName('');
+      setNamingModal({ isOpen: true, mode: 'publish', name: '' });
     } else {
       setToastMessage("Publishing is only available for Palettes & Gradients currently.");
       setTimeout(() => setToastMessage(null), 2500);
     }
   };
 
-  const confirmPublish = async () => {
-    if (!publishName.trim()) {
+  const confirmNamingAction = async () => {
+    if (!namingModal.name.trim()) {
       setToastMessage("Please enter a name for your preset.");
       setTimeout(() => setToastMessage(null), 2500);
       return;
     }
 
-    let success = false;
-    if (activeTab === 'palette') {
-      success = await saveToLibrary('palette', colors, publishName);
-    } else if (activeTab === 'gradient' && gradientRef.current) {
-      const payload = gradientRef.current.getExportPayload();
-      success = await saveToLibrary('gradient', payload, publishName);
+    let result = { success: false, error: 'Operation failed' };
+    const { mode, name } = namingModal;
+
+    if (mode === 'publish') {
+      if (activeTab === 'palette') {
+        result = await saveToLibrary('palette', colors, name);
+      } else if (activeTab === 'gradient' && gradientRef.current) {
+        const payload = gradientRef.current.getExportPayload();
+        result = await saveToLibrary('gradient', payload, name);
+      }
+    } else if (mode === 'save') {
+      if (activeTab === 'palette') {
+        result = await saveToUserLibrary('palette', colors, name);
+      } else if (activeTab === 'gradient' && gradientRef.current) {
+        const payload = gradientRef.current.getExportPayload();
+        result = await saveToUserLibrary('gradient', payload, name);
+      }
     }
 
-    if (success) {
-      setToastMessage(`"${publishName}" published to Community!`);
-      setIsPublishing(false);
-      setViewMode('explore');
+    if (result.success) {
+      setToastMessage(mode === 'publish' ? `"${name}" published to Community!` : `"${name}" saved to your profile!`);
+      setNamingModal({ isOpen: false, mode: 'publish', name: '' });
+      if (mode === 'publish') setViewMode('explore');
     } else {
-      setToastMessage("Failed to publish. Check your connection.");
+      setToastMessage(`Error: ${result.error || 'Failed to save.'}`);
     }
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const handleSaveToProfile = async () => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
+  const handleSaveToProfile = () => {
+    try {
+      console.log('触发 handleSaveToProfile, 用户状态:', user);
+      if (!user) {
+        setShowAuthModal(true);
+        return;
+      }
+      setNamingModal({ isOpen: true, mode: 'save', name: '' });
+      setToastMessage("Opening save dialogue...");
+      setTimeout(() => setToastMessage(null), 1500);
+    } catch (err) {
+      console.error('handleSaveToProfile 发生错误:', err);
     }
-
-    const name = prompt("Name your creation:") || `My ${activeTab}`;
-    let success = false;
-    if (activeTab === 'palette') {
-      success = await saveToUserLibrary('palette', colors, name);
-    } else if (activeTab === 'gradient' && gradientRef.current) {
-      const payload = gradientRef.current.getExportPayload();
-      success = await saveToUserLibrary('gradient', payload, name);
-    }
-
-    if (success) {
-      setToastMessage(`"${name}" saved to your profile!`);
-    } else {
-      setToastMessage("Failed to save. Check your connection.");
-    }
-    setTimeout(() => setToastMessage(null), 2500);
   };
 
   const handleApplyAIPalette = (aiColors) => {
@@ -284,7 +285,15 @@ function App() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#ffffff', padding: '0.75rem 2rem', borderBottom: '1px solid rgba(0,0,0,0.05)', position: 'relative', zIndex: 5 }}>
           
           {/* Spacer logic balancing the flex layout */}
-          <div style={{ flex: 1 }}></div>
+          {/* Spacebar Tip on the Left */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+            {activeTab === 'palette' && viewMode === 'create' && (
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', border: '1px solid #e2e8f0', color: '#64748b' }}>Space</span>
+                Press to Generate
+              </span>
+            )}
+          </div>
 
           <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
             <button 
@@ -434,12 +443,16 @@ function App() {
         <Toast message={toastMessage} />
       )}
 
-      {/* Community Publish Modal */}
-      {isPublishing && (
-        <div className="publish-overlay">
+      {/* Community Publish / Save Modal */}
+      {namingModal.isOpen && (
+        <div className="publish-overlay" style={{ zIndex: 600 }}>
           <div className="publish-modal">
-            <h2>Give it a name</h2>
-            <p>Your {activeTab} will be shared with the community. How would you describe this vibe?</p>
+            <h2>{namingModal.mode === 'publish' ? 'Community Ready?' : 'Save to Profile'}</h2>
+            <p>
+              {namingModal.mode === 'publish' 
+                ? `Your ${activeTab} will be shared with the community. How would you describe this vibe?`
+                : `Give your ${activeTab} a name so you can find it later in your library.`}
+            </p>
             
             <div className="publish-field">
               <label>Preset Name</label>
@@ -447,25 +460,25 @@ function App() {
                 autoFocus
                 type="text" 
                 className="publish-input"
-                placeholder="e.g. Neon Nights..."
-                value={publishName}
-                onChange={(e) => setPublishName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && confirmPublish()}
+                placeholder={namingModal.mode === 'publish' ? 'e.g. Neon Nights...' : 'e.g. Brand Primary...'}
+                value={namingModal.name}
+                onChange={(e) => setNamingModal({ ...namingModal, name: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && confirmNamingAction()}
               />
             </div>
 
             <div className="publish-actions">
               <button 
                 className="btn-publish-cancel" 
-                onClick={() => setIsPublishing(false)}
+                onClick={() => setNamingModal({ ...namingModal, isOpen: false })}
               >
                 Cancel
               </button>
               <button 
                 className="btn-publish-confirm" 
-                onClick={confirmPublish}
+                onClick={confirmNamingAction}
               >
-                Publish Ready
+                {namingModal.mode === 'publish' ? 'Publish Ready' : 'Secure Save'}
               </button>
             </div>
           </div>

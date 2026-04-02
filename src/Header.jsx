@@ -40,9 +40,7 @@ export default function Header({
       </div>
 
       <div className="header-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1.5rem' }}>
-        {activeTab === 'palette' && viewMode === 'create' && (
-          <span className="helper-text">Press Spacebar to generate</span>
-        )}
+        {/* Tip removed to be moved to toolbar */}
 
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

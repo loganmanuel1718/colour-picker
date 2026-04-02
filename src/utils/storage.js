@@ -35,7 +35,7 @@ export const getLibrary = async (type) => {
 
 export const saveToLibrary = async (type, payload, name) => {
   try {
-    if (!supabase) return false;
+    if (!supabase) return { success: false, error: 'Supabase not initialized' };
 
     const { data, error } = await supabase
       .from('gallery')
@@ -45,10 +45,10 @@ export const saveToLibrary = async (type, payload, name) => {
       .select();
 
     if (error) throw error;
-    return true;
+    return { success: true, data };
   } catch(e) {
     console.error('Error saving to Supabase:', e);
-    return false;
+    return { success: false, error: e.message || 'Unknown error' };
   }
 };
 
@@ -120,23 +120,23 @@ export const getUserLibrary = async (type) => {
 
 export const saveToUserLibrary = async (type, payload, name) => {
   try {
-    if (!supabase) return false;
+    if (!supabase) return { success: false, error: 'Supabase not initialized' };
     
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    if (!user) return { success: false, error: 'User not authenticated' };
 
     const { data, error } = await supabase
       .from('user_saves')
       .insert([
-        { type, data: payload, name, user_id: user.id }
+        { type, data: payload, name }
       ])
       .select();
 
     if (error) throw error;
-    return true;
+    return { success: true, data };
   } catch(e) {
     console.error('Error saving to Personal Library:', e);
-    return false;
+    return { success: false, error: e.message || 'Unknown error' };
   }
 };
 
