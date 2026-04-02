@@ -8,6 +8,7 @@ import ColorColumn from './ColorColumn';
 import GradientMaker from './GradientMaker';
 import GlassMaker from './GlassMaker';
 import ContrastMaker from './ContrastMaker';
+import BrandAI from './BrandAI';
 import ExploreGallery from './ExploreGallery';
 import { generateRandomColor } from './utils/colors';
 import { 
@@ -63,7 +64,7 @@ function App() {
 
   // Force viewMode gracefully back to specific layouts if user traverses unsupported global tabs
   useEffect(() => {
-    if (activeTab === 'glass' || activeTab === 'contrast') {
+    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai') {
       setViewMode('create');
     }
   }, [activeTab]);
@@ -182,6 +183,17 @@ function App() {
     } else {
       setToastMessage("Publishing is only available for Palettes & Gradients currently.");
     }
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const handleApplyAIPalette = (aiColors) => {
+    setColors(aiColors.map(c => ({
+      id: c.id,
+      hex: c.hex,
+      isLocked: false
+    })));
+    setActiveTab('palette');
+    setToastMessage("AI palette applied to generator!");
     setTimeout(() => setToastMessage(null), 2500);
   };
 
@@ -318,6 +330,14 @@ function App() {
         <GlassMaker 
           colors={colors} 
           setToastMessage={setToastMessage}
+        />
+      ) : activeTab === 'brand-ai' ? (
+        <BrandAI 
+          onApplyPalette={handleApplyAIPalette}
+          setToastMessage={(msg) => {
+             setToastMessage(msg);
+             setTimeout(() => setToastMessage(null), 2500);
+          }}
         />
       ) : (
         <ContrastMaker 

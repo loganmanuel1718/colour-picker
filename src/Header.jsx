@@ -89,6 +89,23 @@ export default function Header({ activeTab, setActiveTab, setGradientType, onGen
         >
           Contrast
         </button>
+        <button 
+          onClick={() => setActiveTab('brand-ai')}
+          style={{
+            background: activeTab === 'brand-ai' ? 'white' : 'transparent',
+            color: activeTab === 'brand-ai' ? '#3b82f6' : '#64748b',
+            border: 'none',
+            padding: '0.5rem 1.5rem',
+            borderRadius: '999px',
+            fontFamily: 'var(--font-primary)',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            boxShadow: activeTab === 'brand-ai' ? '0 2px 8px rgba(0,0,0,0.05)' : 'none'
+          }}
+        >
+          Brand AI
+        </button>
       </div>
 
       <div className="header-actions" style={{ flex: 1, justifyContent: 'flex-end' }}>
