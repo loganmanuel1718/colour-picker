@@ -57,6 +57,13 @@ export default function ExploreGallery({ activeTab, onLoadData }) {
           return (
             <div key={item.id} className="gallery-card">
               
+              <div className="gallery-card-header">
+                <h3 className="gallery-title">{item.name || 'Untitled'}</h3>
+                <span className="gallery-date">
+                  {new Date(item.timestamp).toLocaleDateString()}
+                </span>
+              </div>
+
               {/* Specialized Renderer depending on the Tool Context */}
               {activeTab === 'palette' && (
                 <div className="gallery-preview-palette">
@@ -72,12 +79,7 @@ export default function ExploreGallery({ activeTab, onLoadData }) {
               )}
               
               <div className="gallery-card-footer">
-                <div className="gallery-meta">
-                  <span className="gallery-date">
-                    {new Date(item.timestamp).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="gallery-actions">
+                <div className="gallery-actions" style={{ width: '100%', justifyContent: 'space-between' }}>
                   <button 
                     onClick={() => handleLike(item.id)} 
                     className={`gallery-btn btn-like ${isLiked ? 'liked' : ''}`}

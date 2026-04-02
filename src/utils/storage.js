@@ -24,6 +24,7 @@ export const getLibrary = async (type) => {
       timestamp: item.created_at,
       type: item.type,
       data: item.data,
+      name: item.name || null, // Capture name column
       likes: item.likes_count || 0
     }));
   } catch(e) {
@@ -32,14 +33,14 @@ export const getLibrary = async (type) => {
   }
 };
 
-export const saveToLibrary = async (type, payload) => {
+export const saveToLibrary = async (type, payload, name) => {
   try {
     if (!supabase) return false;
 
     const { data, error } = await supabase
       .from('gallery')
       .insert([
-        { type, data: payload }
+        { type, data: payload, name }
       ])
       .select();
 

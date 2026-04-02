@@ -154,34 +154,46 @@ function App() {
     }
   };
 
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishName, setPublishName] = useState('');
+
   const handleExport = () => {
     exportPaletteAsImage(colors);
     setToastMessage("Palette exported to image!");
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const handlePublish = async () => {
-    if (activeTab === 'palette') {
-      const success = await saveToLibrary('palette', colors);
-      if (success) {
-        setToastMessage("Palette published to Community!");
-        setViewMode('explore');
-      } else {
-        setToastMessage("Failed to publish palette.");
-      }
-    } else if (activeTab === 'gradient') {
-      if (gradientRef.current) {
-        const payload = gradientRef.current.getExportPayload();
-        const success = await saveToLibrary('gradient', payload);
-        if (success) {
-          setToastMessage("Gradient published to Community!");
-          setViewMode('explore');
-        } else {
-          setToastMessage("Failed to publish gradient.");
-        }
-      }
+  const handlePublish = () => {
+    if (activeTab === 'palette' || activeTab === 'gradient') {
+      setIsPublishing(true);
+      setPublishName('');
     } else {
       setToastMessage("Publishing is only available for Palettes & Gradients currently.");
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  };
+
+  const confirmPublish = async () => {
+    if (!publishName.trim()) {
+      setToastMessage("Please enter a name for your preset.");
+      setTimeout(() => setToastMessage(null), 2500);
+      return;
+    }
+
+    let success = false;
+    if (activeTab === 'palette') {
+      success = await saveToLibrary('palette', colors, publishName);
+    } else if (activeTab === 'gradient' && gradientRef.current) {
+      const payload = gradientRef.current.getExportPayload();
+      success = await saveToLibrary('gradient', payload, publishName);
+    }
+
+    if (success) {
+      setToastMessage(`"${publishName}" published to Community!`);
+      setIsPublishing(false);
+      setViewMode('explore');
+    } else {
+      setToastMessage("Failed to publish. Check your connection.");
     }
     setTimeout(() => setToastMessage(null), 2500);
   };
@@ -349,6 +361,44 @@ function App() {
       {/* Subtle Toast Notification */}
       {toastMessage && (
         <Toast message={toastMessage} />
+      )}
+
+      {/* Community Publish Modal */}
+      {isPublishing && (
+        <div className="publish-overlay">
+          <div className="publish-modal">
+            <h2>Give it a name</h2>
+            <p>Your {activeTab} will be shared with the community. How would you describe this vibe?</p>
+            
+            <div className="publish-field">
+              <label>Preset Name</label>
+              <input 
+                autoFocus
+                type="text" 
+                className="publish-input"
+                placeholder="e.g. Neon Nights..."
+                value={publishName}
+                onChange={(e) => setPublishName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && confirmPublish()}
+              />
+            </div>
+
+            <div className="publish-actions">
+              <button 
+                className="btn-publish-cancel" 
+                onClick={() => setIsPublishing(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn-publish-confirm" 
+                onClick={confirmPublish}
+              >
+                Publish Ready
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
