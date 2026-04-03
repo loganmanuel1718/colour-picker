@@ -2,24 +2,55 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 2rem;
-  gap: 2rem;
-  overflow: hidden;
+  padding: 1rem;
+  gap: 1rem;
+  /* Mobile: let the content scroll naturally */
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+@media (min-width: 640px) {
+  .gradient-maker {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
 }
 
 @media (min-width: 1024px) {
   .gradient-maker {
     flex-direction: row;
+    padding: 2rem;
+    gap: 2rem;
+    /* Desktop: locked height layout, internal scroll for controls */
+    overflow: hidden;
   }
 }
 
 .gradient-preview-container {
-  flex: 1;
+  flex: none;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
   position: relative;
-  min-height: 400px;
+  /* Explicit height in column (mobile) layout */
+  height: 260px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .gradient-preview-container {
+    height: 350px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .gradient-preview-container {
+    /* In row layout: stretch to fill the available height */
+    flex: 1;
+    height: auto;
+    align-self: stretch;
+  }
 }
 
 .gradient-preview {
@@ -29,15 +60,26 @@
 }
 
 .gradient-controls {
-  flex-basis: 350px;
   background: white;
   border-radius: 24px;
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  overflow-y: auto;
+  /* Mobile: not scrollable, content flows naturally */
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .gradient-controls {
+    flex-basis: 350px;
+    flex-shrink: 0;
+    /* Desktop: fixed height parent, so inner scroll works */
+    overflow-y: auto;
+    max-height: 100%;
+  }
 }
 
 .control-group {
@@ -170,6 +212,7 @@
 
 .node-color-picker input[type="color"] {
   -webkit-appearance: none;
+  appearance: none;
   border: none;
   width: 32px;
   height: 32px;

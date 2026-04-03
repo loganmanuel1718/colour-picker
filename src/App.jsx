@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { HeartPulse, Layers, Download, Type } from 'lucide-react';
+import { HeartPulse, Layers, Download } from 'lucide-react';
 import './App.css';
 import Header from './Header';
 import ColorColumn from './ColorColumn';
@@ -12,7 +12,6 @@ import BrandAI from './BrandAI';
 import AuthModal from './AuthModal';
 import MyLibrary from './MyLibrary';
 import ExploreGallery from './ExploreGallery';
-import FluidMaker from './FluidMaker';
 import { generateRandomColor } from './utils/colors';
 import { 
   DndContext, 
@@ -84,7 +83,7 @@ function App() {
 
   // Force viewMode gracefully back to specific layouts if user traverses unsupported global tabs
   useEffect(() => {
-    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai' || activeTab === 'fluid') {
+    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai') {
       setViewMode('create');
     }
   }, [activeTab]);
@@ -309,86 +308,78 @@ function App() {
       />
 
       {(activeTab === 'palette' || activeTab === 'gradient') && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#ffffff', padding: '0.75rem 2rem', borderBottom: '1px solid rgba(0,0,0,0.05)', position: 'relative', zIndex: 5 }}>
+        <div className="sub-toolbar">
           
-          {/* Spacer logic balancing the flex layout */}
-          {/* Spacebar Tip on the Left */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+          {/* Left: Spacebar tip */}
+          <div className="sub-toolbar-left">
             {activeTab === 'palette' && viewMode === 'create' && (
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', border: '1px solid #e2e8f0', color: '#64748b' }}>Space</span>
-                Press to Generate
+              <span className="space-tip">
+                <span className="space-key">Space</span>
+                <span className="space-label">to Generate</span>
               </span>
             )}
           </div>
 
-          <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-            <button 
-              onClick={() => setViewMode('create')}
-              style={{ fontFamily: 'var(--font-primary)', padding: '0.4rem 2.5rem', borderRadius: '6px', border: 'none', background: viewMode === 'create' ? 'white' : 'transparent', color: viewMode === 'create' ? '#3b82f6' : '#64748b', fontWeight: 'bold', cursor: 'pointer', boxShadow: viewMode === 'create' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
-            >
-              Create
-            </button>
-            <button 
-              onClick={() => setViewMode('explore')}
-              style={{ fontFamily: 'var(--font-primary)', padding: '0.4rem 2.5rem', borderRadius: '6px', border: 'none', background: viewMode === 'explore' ? 'white' : 'transparent', color: viewMode === 'explore' ? '#3b82f6' : '#64748b', fontWeight: 'bold', cursor: 'pointer', boxShadow: viewMode === 'explore' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
-            >
-              Explore Community
-            </button>
-            {user && (
-              <button 
-                onClick={() => setViewMode('my-library')}
-                style={{ fontFamily: 'var(--font-primary)', padding: '0.4rem 2.5rem', borderRadius: '6px', border: 'none', background: viewMode === 'my-library' ? 'white' : 'transparent', color: viewMode === 'my-library' ? '#3b82f6' : '#64748b', fontWeight: 'bold', cursor: 'pointer', boxShadow: viewMode === 'my-library' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.2s' }}
+          {/* Center: View mode switcher */}
+          <div className="sub-toolbar-center">
+            <div className="view-switch">
+              <button
+                onClick={() => setViewMode('create')}
+                className={`view-btn ${viewMode === 'create' ? 'active' : ''}`}
               >
-                My Library
+                Create
               </button>
-            )}
+              <button
+                onClick={() => setViewMode('explore')}
+                className={`view-btn ${viewMode === 'explore' ? 'active' : ''}`}
+              >
+                Explore
+              </button>
+              {user && (
+                <button
+                  onClick={() => setViewMode('my-library')}
+                  className={`view-btn ${viewMode === 'my-library' ? 'active' : ''}`}
+                >
+                  My Library
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Contextual Action Tooling */}
-          <div style={{ flex: 1, display: 'flex', gap: '1rem', justifyContent: 'flex-end', alignItems: 'center' }}>
-             {(activeTab === 'palette' || activeTab === 'gradient') && viewMode === 'create' && (
+          {/* Right: Contextual action buttons */}
+          {(activeTab === 'palette' || activeTab === 'gradient') && viewMode === 'create' && (
+            <div className="sub-toolbar-right">
+              <button onClick={handleSaveToProfile} className="toolbar-btn toolbar-btn--save">
+                <Download size={15} />
+                <span>{user ? 'Save' : 'Sign in'}</span>
+              </button>
+
+              <button onClick={handlePublish} className="toolbar-btn toolbar-btn--publish">
+                <HeartPulse size={15} />
+                <span>Publish</span>
+              </button>
+
+              {activeTab === 'palette' && (
                 <>
-                  <button 
-                    onClick={handleSaveToProfile}
-                    title="Save to your Profile"
-                    style={{ background: '#eff6ff', color: '#3b82f6', border: '2px solid #3b82f6', padding: '0.4rem 1rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  <button
+                    onClick={() => { setGradientType('mesh'); setActiveTab('gradient'); }}
+                    className="toolbar-btn toolbar-btn--mesh"
                   >
-                    <Download size={16} /> {user ? 'Save to Profile' : 'Sign in to Save'}
+                    <Layers size={15} />
+                    <span>Mesh it!</span>
                   </button>
 
-                  <button 
-                    onClick={handlePublish}
-                    title="Publish to Community"
-                    style={{ background: '#fef2f2', color: '#ef4444', border: '2px solid #ef4444', padding: '0.4rem 1rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '6px' }}
-                  >
-                    <HeartPulse size={16} /> Publish
+                  <button onClick={handleExport} className="toolbar-btn toolbar-btn--export">
+                    <Download size={15} />
+                    <span>Export</span>
                   </button>
-
-                  {activeTab === 'palette' && (
-                    <>
-                      <button 
-                        onClick={() => { setGradientType('mesh'); setActiveTab('gradient'); }}
-                        title="Turn into Mesh"
-                        style={{ background: 'white', color: '#8b5cf6', border: '2px solid #8b5cf6', padding: '0.4rem 1rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '6px' }}
-                      >
-                        <Layers size={16} /> Mesh it!
-                      </button>
-
-                      <button 
-                        onClick={handleExport}
-                        title="Export Palette"
-                        style={{ background: 'white', color: '#3b82f6', border: '2px solid #3b82f6', padding: '0.4rem 1rem', borderRadius: '999px', fontFamily: 'var(--font-primary)', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '6px' }}
-                      >
-                        <Download size={16} /> Export
-                      </button>
-                    </>
-                  )}
                 </>
-             )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       )}
+
       
       {viewMode === 'explore' ? (
         <ExploreGallery activeTab={activeTab} onLoadData={(data) => { 
@@ -468,10 +459,6 @@ function App() {
              setToastMessage(msg);
              setTimeout(() => setToastMessage(null), 2500);
           }}
-        />
-      ) : activeTab === 'fluid' ? (
-        <FluidMaker 
-          setToastMessage={setToastMessage}
         />
       ) : (
         <ContrastMaker 

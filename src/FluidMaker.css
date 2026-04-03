@@ -1,8 +1,15 @@
 .fluid-maker {
   display: flex;
-  height: calc(100vh - 120px);
   background: #f8fafc;
   animation: fadeIn 0.4s ease-out;
+  /* Height set via media query below */
+}
+
+@media (min-width: 1025px) {
+  .fluid-maker {
+    height: calc(100vh - 120px);
+    overflow: hidden;
+  }
 }
 
 @keyframes fadeIn {
@@ -12,14 +19,23 @@
 
 /* Sidebar Controls */
 .fluid-sidebar {
-  width: 380px;
+  width: 320px;
+  flex-shrink: 0;
   background: white;
   border-right: 1px solid #e2e8f0;
-  padding: 2rem;
+  padding: 1.5rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1280px) {
+  .fluid-sidebar {
+    width: 380px;
+    padding: 2rem;
+    gap: 2rem;
+  }
 }
 
 .fluid-sidebar h2 {
@@ -110,13 +126,21 @@
 }
 
 .preview-header {
-  padding: 1.5rem 3rem;
+  padding: 1rem 1.5rem;
   background: white;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   z-index: 10;
+}
+
+@media (min-width: 640px) {
+  .preview-header {
+    padding: 1.5rem 3rem;
+  }
 }
 
 .viewport-slider-container {
@@ -234,10 +258,16 @@
   .fluid-maker {
     flex-direction: column;
     height: auto;
+    min-height: 100%;
   }
   .fluid-sidebar {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  .fluid-preview-container {
+    min-height: 60vh;
   }
 }
