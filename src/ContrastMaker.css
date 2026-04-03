@@ -95,6 +95,8 @@
   flex-direction: column !important;
   align-items: stretch !important;
   gap: 0.75rem !important;
+  /* Allow tooltip panels to escape the clipping of the scrollable controls panel */
+  overflow: visible !important;
 }
 
 .sidebar-badges .wcag-badge {
@@ -121,4 +123,126 @@
 
 .contrast-controls .slider-container input[type="range"] {
   flex: 1;
+}
+
+/* Ensure the contrast sidebar's overflow doesn't clip WCAG tooltips */
+.contrast-controls {
+  overflow: visible !important;
+}
+
+/* ==============================
+   WCAG Tooltip System
+   ============================== */
+
+/* Each badge gets a wrapper that acts as the tooltip trigger */
+.wcag-badge-wrapper {
+  position: relative;
+  display: flex;
+}
+
+/* The tooltip panel — hidden by default */
+.wcag-tooltip {
+  position: absolute;
+  /* Appear below the badge (easier on sidebar layout) */
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: 260px;
+  background: #1e293b;
+  color: #f1f5f9;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 999;
+  /* Keep inside viewport on narrow screens */
+  max-width: calc(100vw - 2rem);
+}
+
+/* Arrow pointing upward */
+.wcag-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top: none;
+  border-bottom-color: #1e293b;
+}
+
+/* Show on hover */
+.wcag-badge-wrapper:hover .wcag-tooltip,
+.wcag-badge-wrapper:focus-within .wcag-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+/* Tooltip internals */
+.wcag-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.wcag-tooltip-ratio {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: -0.5px;
+}
+
+.wcag-tooltip-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+.wcag-tooltip-status.pass {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.wcag-tooltip-status.fail {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.wcag-tooltip-summary {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wcag-tooltip-detail {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* On very small screens, anchor the tooltip to the left edge instead of centering */
+@media (max-width: 480px) {
+  .wcag-tooltip {
+    left: 0;
+    transform: translateX(0) translateY(4px);
+  }
+  .wcag-tooltip::before {
+    left: 30px;
+    transform: none;
+  }
+  .wcag-badge-wrapper:hover .wcag-tooltip,
+  .wcag-badge-wrapper:focus-within .wcag-tooltip {
+    transform: translateX(0) translateY(0);
+  }
 }

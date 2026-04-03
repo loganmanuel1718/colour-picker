@@ -62,13 +62,47 @@ export default function ContrastMaker({ colors, onUseInPalette }) {
     setTextHsl(bgHsl);
     setBgHsl(textHsl);
   };
-  
-  const renderBadge = (label, passes) => (
-    <div className={`wcag-badge ${passes ? 'pass' : 'fail'}`}>
-      <span>{label}</span>
-      {passes ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-    </div>
-  );
+
+  const BADGE_INFO = {
+    'AA Small': {
+      ratio: '4.5:1',
+      summary: 'Normal text on any background',
+      detail: 'Required by WCAG 2.1 Level AA for body text and UI components under 18pt (or 14pt bold). The most common accessibility standard enforced by law in many countries.',
+    },
+    'AA Large': {
+      ratio: '3.0:1',
+      summary: 'Large or bold text',
+      detail: 'Required for text that is at least 18pt (24px) or 14pt bold (≈18.67px bold). Large text is easier to read so a lower ratio is acceptable.',
+    },
+    'AAA': {
+      ratio: '7.0:1',
+      summary: 'Enhanced — maximum legibility',
+      detail: 'WCAG 2.1 Level AAA, the highest standard. Recommended for long-form reading, medical, or government content. Guarantees readability for users with severe visual impairments.',
+    },
+  };
+
+  const renderBadge = (key, passes) => {
+    const info = BADGE_INFO[key];
+    const label = `${key} (${info.ratio})`;
+    return (
+      <div className="wcag-badge-wrapper" key={key}>
+        <div className={`wcag-badge ${passes ? 'pass' : 'fail'}`}>
+          <span>{label}</span>
+          {passes ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+        </div>
+        <div className="wcag-tooltip" role="tooltip">
+          <div className="wcag-tooltip-header">
+            <span className="wcag-tooltip-ratio">{info.ratio}</span>
+            <span className={`wcag-tooltip-status ${passes ? 'pass' : 'fail'}`}>
+              {passes ? '✓ Passes' : '✗ Fails'}
+            </span>
+          </div>
+          <div className="wcag-tooltip-summary">{info.summary}</div>
+          <p className="wcag-tooltip-detail">{info.detail}</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="gradient-maker" ref={mainRef}>
@@ -96,9 +130,9 @@ export default function ContrastMaker({ colors, onUseInPalette }) {
         <div className="control-group" style={{ marginBottom: '1.5rem' }}>
           <label style={{ marginBottom: '1rem', display: 'block' }}>Contrast Accessibility</label>
           <div className="wcag-badge-grid sidebar-badges">
-            {renderBadge('AA Small (4.5)', passesAASmall)}
-            {renderBadge('AA Large (3.0)', passesAALarge)}
-            {renderBadge('AAA (7.0)', passesAAASmall)}
+            {renderBadge('AA Small', passesAASmall)}
+            {renderBadge('AA Large', passesAALarge)}
+            {renderBadge('AAA', passesAAASmall)}
           </div>
         </div>
 
