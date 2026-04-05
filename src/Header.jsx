@@ -7,6 +7,7 @@ const tabs = [
   { id: 'glass', label: 'Glass' },
   { id: 'contrast', label: 'Contrast' },
   { id: 'brand-ai', label: 'Brand AI' },
+  { id: 'brief-builder', label: 'Brief Builder' },
 ];
 
 const tabBtnStyle = (active) => ({

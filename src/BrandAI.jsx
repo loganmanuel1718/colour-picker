@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { Sparkles, ArrowRight, Copy, Check, Palette } from 'lucide-react';
@@ -14,58 +14,73 @@ const BRAND_POOLS = {
   cyberpunk: { h: [280, 320], s: [80, 100], l: [40, 60], name: "Cyberpunk / Neon" }
 };
 
-export default function BrandAI({ onApplyPalette, setToastMessage }) {
-  const [prompt, setPrompt] = useState('');
+export default function BrandAI({ onApplyPalette, setToastMessage, initialPrompt = '' }) {
+  const [prompt, setPrompt] = useState(initialPrompt);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState(null);
   const resultsRef = useRef(null);
 
-  const generateAIPalette = () => {
-    if (!prompt.trim()) return;
+  const generateAIPalette = React.useCallback((overridePrompt) => {
+    const textToSearch = typeof overridePrompt === 'string' ? overridePrompt : prompt;
+    if (!textToSearch || !textToSearch.trim()) return;
     
     setIsGenerating(true);
     setResults(null);
 
     // Simulate "Thinking" time
     setTimeout(() => {
-      const lowerPrompt = prompt.toLowerCase();
-      let pool = BRAND_POOLS.tech; // Default
+      try {
+        const lowerPrompt = textToSearch.toLowerCase();
+        let pool = BRAND_POOLS.tech; // Default
 
-      if (lowerPrompt.includes('luxury') || lowerPrompt.includes('gold') || lowerPrompt.includes('premium') || lowerPrompt.includes('expensive')) {
-        pool = BRAND_POOLS.luxury;
-      } else if (lowerPrompt.includes('nature') || lowerPrompt.includes('eco') || lowerPrompt.includes('green') || lowerPrompt.includes('plant') || lowerPrompt.includes('forest')) {
-        pool = BRAND_POOLS.nature;
-      } else if (lowerPrompt.includes('bold') || lowerPrompt.includes('fire') || lowerPrompt.includes('red') || lowerPrompt.includes('energy') || lowerPrompt.includes('sport')) {
-        pool = BRAND_POOLS.bold;
-      } else if (lowerPrompt.includes('minimal') || lowerPrompt.includes('white') || lowerPrompt.includes('soft') || lowerPrompt.includes('clean') || lowerPrompt.includes('calm')) {
-        pool = BRAND_POOLS.minimal;
-      } else if (lowerPrompt.includes('cyber') || lowerPrompt.includes('neon') || lowerPrompt.includes('future') || lowerPrompt.includes('punk') || lowerPrompt.includes('pink') || lowerPrompt.includes('purple')) {
-        pool = BRAND_POOLS.cyberpunk;
-      } else if (lowerPrompt.includes('tech') || lowerPrompt.includes('blue') || lowerPrompt.includes('software') || lowerPrompt.includes('ai') || lowerPrompt.includes('modern')) {
-        pool = BRAND_POOLS.tech;
+        if (lowerPrompt.includes('luxury') || lowerPrompt.includes('gold') || lowerPrompt.includes('premium') || lowerPrompt.includes('expensive')) {
+          pool = BRAND_POOLS.luxury;
+        } else if (lowerPrompt.includes('nature') || lowerPrompt.includes('eco') || lowerPrompt.includes('green') || lowerPrompt.includes('plant') || lowerPrompt.includes('forest')) {
+          pool = BRAND_POOLS.nature;
+        } else if (lowerPrompt.includes('bold') || lowerPrompt.includes('fire') || lowerPrompt.includes('red') || lowerPrompt.includes('energy') || lowerPrompt.includes('sport')) {
+          pool = BRAND_POOLS.bold;
+        } else if (lowerPrompt.includes('minimal') || lowerPrompt.includes('white') || lowerPrompt.includes('soft') || lowerPrompt.includes('clean') || lowerPrompt.includes('calm') || lowerPrompt.includes('modern')) {
+          pool = BRAND_POOLS.minimal;
+        } else if (lowerPrompt.includes('cyber') || lowerPrompt.includes('neon') || lowerPrompt.includes('future') || lowerPrompt.includes('punk') || lowerPrompt.includes('pink') || lowerPrompt.includes('purple')) {
+          pool = BRAND_POOLS.cyberpunk;
+        } else if (lowerPrompt.includes('tech') || lowerPrompt.includes('blue') || lowerPrompt.includes('software') || lowerPrompt.includes('ai') || lowerPrompt.includes('modern')) {
+          pool = BRAND_POOLS.tech;
+        }
+
+        // Build 5 colors based on pool
+        const newPalette = [
+          { type: 'Primary', h: pool.h[0], s: pool.s[0] + 10, l: pool.l[0] },
+          { type: 'Secondary', h: (pool.h[0] + 30) % 360, s: pool.s[0], l: pool.l[0] + 20 },
+          { type: 'Accent', h: (pool.h[0] + 180) % 360, s: 80, l: 50 },
+          { type: 'Surface', h: pool.h[0], s: 5, l: 95 },
+          { type: 'Deep', h: pool.h[0], s: 20, l: 15 }
+        ].map(c => ({
+          id: `ai-${Date.now()}-${Math.random()}`,
+          type: c.type,
+          hex: hslToHex(c.h, c.s, c.l),
+          isLocked: false
+        }));
+
+        setResults(newPalette);
+      } catch (err) {
+        console.error("Error generating AI palette:", err);
+        setToastMessage("Failed to generate palette.");
+      } finally {
+        setIsGenerating(false);
       }
+    }, 1500);
+  }, [prompt, setToastMessage]);
 
-      // Build 5 colors based on pool
-      const newPalette = [
-        { type: 'Primary', h: pool.h[0], s: pool.s[0] + 10, l: pool.l[0] },
-        { type: 'Secondary', h: (pool.h[0] + 30) % 360, s: pool.s[0], l: pool.l[0] + 20 },
-        { type: 'Accent', h: (pool.h[0] + 180) % 360, s: 80, l: 50 },
-        { type: 'Surface', h: pool.h[0], s: 5, l: 95 },
-        { type: 'Deep', h: pool.h[0], s: 20, l: 15 }
-      ].map(c => ({
-        id: `ai-${Date.now()}-${Math.random()}`,
-        type: c.type,
-        hex: hslToHex(c.h, c.s, c.l),
-        isLocked: false
-      }));
-
-      setResults(newPalette);
-      setIsGenerating(false);
-    }, 2000);
-  };
+  // Automatically trigger if initialPrompt is provided and changed
+  useEffect(() => {
+    if (initialPrompt) {
+      setPrompt(initialPrompt);
+      generateAIPalette(initialPrompt);
+    }
+  }, [initialPrompt, generateAIPalette]);
 
   useGSAP(() => {
-    if (results) {
+    if (results && resultsRef.current) {
       gsap.fromTo(".ai-card", 
         { y: 30, opacity: 0, scale: 0.95 }, 
         { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.1, ease: 'back.out(1.7)' }
@@ -84,7 +99,7 @@ export default function BrandAI({ onApplyPalette, setToastMessage }) {
   };
 
   return (
-    <div className="brand-ai-container">
+    <div className="brand-ai-container" ref={resultsRef}>
       {!results && !isGenerating && (
         <div className="ai-intro">
           <div className="ai-badge">
@@ -129,7 +144,7 @@ export default function BrandAI({ onApplyPalette, setToastMessage }) {
       )}
 
       {results && !isGenerating && (
-        <div ref={resultsRef} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div className="ai-results">
             {results.map((color) => (
               <div key={color.id} className="ai-card">

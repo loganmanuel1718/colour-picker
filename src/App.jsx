@@ -12,6 +12,7 @@ import BrandAI from './BrandAI';
 import AuthModal from './AuthModal';
 import MyLibrary from './MyLibrary';
 import ExploreGallery from './ExploreGallery';
+import BriefBuilder from './BriefBuilder';
 import { generateRandomColor } from './utils/colors';
 import { 
   DndContext, 
@@ -36,6 +37,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingGradient, setPendingGradient] = useState(null);
+  const [brandAIPrompt, setBrandAIPrompt] = useState('');
   const gradientRef = useRef(null);
   
   // State: array of objects { id, hex, isLocked }
@@ -83,7 +85,7 @@ function App() {
 
   // Force viewMode gracefully back to specific layouts if user traverses unsupported global tabs
   useEffect(() => {
-    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai') {
+    if (activeTab === 'glass' || activeTab === 'contrast' || activeTab === 'brand-ai' || activeTab === 'brief-builder') {
       setViewMode('create');
     }
   }, [activeTab]);
@@ -452,9 +454,21 @@ function App() {
           colors={colors} 
           setToastMessage={setToastMessage}
         />
+      ) : activeTab === 'brief-builder' ? (
+        <BriefBuilder 
+          onSendToBrandAI={(vibe) => {
+            setBrandAIPrompt(vibe);
+            setActiveTab('brand-ai');
+          }}
+          setToastMessage={(msg) => {
+             setToastMessage(msg);
+             setTimeout(() => setToastMessage(null), 2500);
+          }}
+        />
       ) : activeTab === 'brand-ai' ? (
         <BrandAI 
           onApplyPalette={handleApplyAIPalette}
+          initialPrompt={brandAIPrompt}
           setToastMessage={(msg) => {
              setToastMessage(msg);
              setTimeout(() => setToastMessage(null), 2500);
